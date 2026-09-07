@@ -20,6 +20,7 @@ import { firebaseConfig, PRODUCTS_COLLECTION } from "../js/firebase-config.js";
 import { KNOWN_BRANDS, makeBrandLogo } from "../js/brands.js";
 
 const BRANDS_COLLECTION = "brands";
+const BTU_PER_TON = 12000;
 
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
@@ -82,6 +83,15 @@ async function init() {
   saveBrandBtn.addEventListener("click", handleSaveBrand);
   imageFileInput.addEventListener("change", handleImageFileChange);
 
+  fields.capacity_ton.addEventListener("input", () => {
+    const ton = parseFloat(fields.capacity_ton.value);
+    fields.capacity_btu.value = isNaN(ton) ? "" : Math.round(ton * BTU_PER_TON);
+  });
+  fields.capacity_btu.addEventListener("input", () => {
+    const btu = parseFloat(fields.capacity_btu.value);
+    fields.capacity_ton.value = isNaN(btu) ? "" : Math.round((btu / BTU_PER_TON) * 2) / 2;
+  });
+
   await loadBrands();
   await loadProducts();
 }
@@ -93,13 +103,26 @@ function showStatus(message, type) {
 
 function describeFirebaseError(err, action) {
   const code = err && err.code ? err.code : "";
+  if (err && err.message === "UPLOAD_TIMEOUT") {
+    return `${action} توقّف بدون استجابة بعد 20 ثانية. الغالب أن Firebase Storage غير مُفعّل لهذا المشروع بعد — افتح Firebase Console → Storage واضغط "Get started" لإنشاء الـ bucket، ثم انشر storage.rules وحاول مجدداً.`;
+  }
   if (code === "permission-denied" || code === "storage/unauthorized") {
     return `تم رفض ${action}: قواعد الأمان (Security Rules) لا تسمح بهذه العملية. راجع قسم الأمان في README.`;
+  }
+  if (code === "storage/unknown" || code === "storage/retry-limit-exceeded") {
+    return `${action} فشل: تعذّر الوصول إلى Firebase Storage. تأكد أنه مُفعّل للمشروع من Firebase Console → Storage.`;
   }
   if (code === "unavailable" || err instanceof TypeError) {
     return `فشل الاتصال بالشبكة أثناء ${action}. تحقق من اتصالك بالإنترنت وحاول مجدداً.`;
   }
   return `خطأ أثناء ${action}: ${err && err.message ? err.message : "خطأ غير معروف"}`;
+}
+
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error("UPLOAD_TIMEOUT")), ms)),
+  ]);
 }
 
 // ---------------- Brands ----------------
@@ -161,8 +184,8 @@ async function handleSaveBrand() {
     if (file) {
       const path = `brands/${Date.now()}-${file.name}`;
       const ref = storageRef(storage, path);
-      await uploadBytes(ref, file);
-      logo = await getDownloadURL(ref);
+      await withTimeout(uploadBytes(ref, file), 20000);
+      logo = await withTimeout(getDownloadURL(ref), 20000);
     }
 
     await addDoc(collection(db, BRANDS_COLLECTION), { name, logo });
@@ -187,8 +210,8 @@ async function handleImageFileChange() {
   try {
     const path = `products/${Date.now()}-${file.name}`;
     const ref = storageRef(storage, path);
-    await uploadBytes(ref, file);
-    const url = await getDownloadURL(ref);
+    await withTimeout(uploadBytes(ref, file), 20000);
+    const url = await withTimeout(getDownloadURL(ref), 20000);
     fields.image.value = url;
     imagePreview.src = url;
     imagePreview.hidden = false;
