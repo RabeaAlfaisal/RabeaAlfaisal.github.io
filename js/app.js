@@ -29,6 +29,7 @@ import { firebaseConfig, PRODUCTS_COLLECTION } from "./firebase-config.js";
   const catalogGrid = document.getElementById("catalogGrid");
   const emptyState = document.getElementById("emptyState");
   const resultsCount = document.getElementById("resultsCount");
+  const filterBrand = document.getElementById("filterBrand");
   const filterType = document.getElementById("filterType");
   const filterMode = document.getElementById("filterMode");
   const filterCompressor = document.getElementById("filterCompressor");
@@ -62,10 +63,21 @@ import { firebaseConfig, PRODUCTS_COLLECTION } from "./firebase-config.js";
       return;
     }
 
+    populateBrandFilter();
     populateTypeFilter();
     bindEvents();
     renderCatalog();
     renderCart();
+  }
+
+  function populateBrandFilter() {
+    const brands = Array.from(new Set(allProducts.map((p) => p.brand))).sort();
+    brands.forEach((b) => {
+      const opt = document.createElement("option");
+      opt.value = b;
+      opt.textContent = b;
+      filterBrand.appendChild(opt);
+    });
   }
 
   function populateTypeFilter() {
@@ -79,10 +91,11 @@ import { firebaseConfig, PRODUCTS_COLLECTION } from "./firebase-config.js";
   }
 
   function bindEvents() {
-    [filterType, filterMode, filterCompressor, filterPowerSaving, sortBy].forEach((el) =>
+    [filterBrand, filterType, filterMode, filterCompressor, filterPowerSaving, sortBy].forEach((el) =>
       el.addEventListener("change", renderCatalog)
     );
     resetFiltersBtn.addEventListener("click", () => {
+      filterBrand.value = "";
       filterType.value = "";
       filterMode.value = "";
       filterCompressor.value = "";
@@ -100,6 +113,7 @@ import { firebaseConfig, PRODUCTS_COLLECTION } from "./firebase-config.js";
   function getFilteredProducts() {
     let list = allProducts.slice();
 
+    if (filterBrand.value) list = list.filter((p) => p.brand === filterBrand.value);
     if (filterType.value) list = list.filter((p) => p.type === filterType.value);
     if (filterMode.value) list = list.filter((p) => p.mode === filterMode.value);
     if (filterCompressor.value) list = list.filter((p) => p.compressor_type === filterCompressor.value);

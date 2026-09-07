@@ -1,4 +1,4 @@
-// لوحة إدارة المنتجات — تتعامل مباشرة مع Firestore (بدون خادم خلفي)
+// لوحة إدارة المنتجات — تتعامل مباشرة مع Firestore و Firebase Storage (بدون خادم خلفي)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
   getFirestore,
@@ -8,29 +8,51 @@ import {
   setDoc,
   updateDoc,
   deleteDoc,
-  getDoc,
+  addDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 import { firebaseConfig, PRODUCTS_COLLECTION } from "../js/firebase-config.js";
+import { KNOWN_BRANDS, makeBrandLogo } from "../js/brands.js";
+
+const BRANDS_COLLECTION = "brands";
 
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
+const storage = getStorage(firebaseApp);
 
 let products = [];
+let allBrands = [];
 let editingId = null;
 
 // ---------------- DOM refs ----------------
 const statusCard = document.getElementById("statusCard");
-const seedBtn = document.getElementById("seedBtn");
-const refreshBtn = document.getElementById("refreshBtn");
 const productsTableBody = document.getElementById("productsTableBody");
 
 const productForm = document.getElementById("productForm");
 const formTitle = document.getElementById("formTitle");
 const cancelEditBtn = document.getElementById("cancelEditBtn");
+
+const brandSelect = document.getElementById("f_brand");
+const brandLogoPreview = document.getElementById("brandLogoPreview");
+const addBrandToggleBtn = document.getElementById("addBrandToggleBtn");
+const newBrandBox = document.getElementById("newBrandBox");
+const newBrandName = document.getElementById("newBrandName");
+const newBrandLogoFile = document.getElementById("newBrandLogoFile");
+const saveBrandBtn = document.getElementById("saveBrandBtn");
+const cancelBrandBtn = document.getElementById("cancelBrandBtn");
+
+const imageFileInput = document.getElementById("f_image_file");
+const imagePreview = document.getElementById("imagePreview");
+
 const fields = {
   id: document.getElementById("f_id"),
   name: document.getElementById("f_name"),
-  brand: document.getElementById("f_brand"),
+  brand: brandSelect,
   price: document.getElementById("f_price"),
   image: document.getElementById("f_image"),
   type: document.getElementById("f_type"),
@@ -44,12 +66,23 @@ const fields = {
 
 init();
 
-function init() {
-  seedBtn.addEventListener("click", handleSeed);
-  refreshBtn.addEventListener("click", loadProducts);
+async function init() {
   productForm.addEventListener("submit", handleFormSubmit);
   cancelEditBtn.addEventListener("click", resetForm);
-  loadProducts();
+  brandSelect.addEventListener("change", updateBrandLogoPreview);
+  addBrandToggleBtn.addEventListener("click", () => {
+    newBrandBox.hidden = false;
+    newBrandName.value = "";
+    newBrandLogoFile.value = "";
+  });
+  cancelBrandBtn.addEventListener("click", () => {
+    newBrandBox.hidden = true;
+  });
+  saveBrandBtn.addEventListener("click", handleSaveBrand);
+  imageFileInput.addEventListener("change", handleImageFileChange);
+
+  await loadBrands();
+  await loadProducts();
 }
 
 function showStatus(message, type) {
@@ -57,7 +90,115 @@ function showStatus(message, type) {
   statusCard.innerHTML = `<div class="status-box status-${type}">${escapeHtml(message)}</div>`;
 }
 
-// ---------------- Firestore ops ----------------
+function describeFirebaseError(err, action) {
+  const code = err && err.code ? err.code : "";
+  if (code === "permission-denied" || code === "storage/unauthorized") {
+    return `تم رفض ${action}: قواعد الأمان (Security Rules) لا تسمح بهذه العملية. راجع قسم الأمان في README.`;
+  }
+  if (code === "unavailable" || err instanceof TypeError) {
+    return `فشل الاتصال بالشبكة أثناء ${action}. تحقق من اتصالك بالإنترنت وحاول مجدداً.`;
+  }
+  return `خطأ أثناء ${action}: ${err && err.message ? err.message : "خطأ غير معروف"}`;
+}
+
+// ---------------- Brands ----------------
+
+async function loadBrands() {
+  try {
+    const snap = await getDocs(collection(db, BRANDS_COLLECTION));
+    const customBrands = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const knownNames = new Set(KNOWN_BRANDS.map((b) => b.name));
+    allBrands = [...KNOWN_BRANDS, ...customBrands.filter((b) => !knownNames.has(b.name))];
+    populateBrandSelect();
+  } catch (err) {
+    // القراءة العامة يجب أن تعمل حتى بدون كتابة؛ إن فشلت نكتفي بالماركات المعروفة محلياً
+    allBrands = KNOWN_BRANDS.slice();
+    populateBrandSelect();
+    console.error("Failed to load brands from Firestore", err);
+  }
+}
+
+function populateBrandSelect(selectedName) {
+  const previousValue = selectedName || brandSelect.value;
+  brandSelect.innerHTML = "";
+  allBrands.forEach((b) => {
+    const opt = document.createElement("option");
+    opt.value = b.name;
+    opt.textContent = b.name;
+    brandSelect.appendChild(opt);
+  });
+  if (previousValue && allBrands.some((b) => b.name === previousValue)) {
+    brandSelect.value = previousValue;
+  }
+  updateBrandLogoPreview();
+}
+
+function ensureBrandOptionExists(name) {
+  if (!name) return;
+  if (!allBrands.some((b) => b.name === name)) {
+    allBrands.push({ name, logo: makeBrandLogo(name.slice(0, 2).toUpperCase(), "#607d8b") });
+    populateBrandSelect(name);
+  }
+}
+
+function updateBrandLogoPreview() {
+  const brand = allBrands.find((b) => b.name === brandSelect.value);
+  brandLogoPreview.innerHTML = brand && brand.logo ? `<img src="${brand.logo}" alt="شعار ${escapeHtml(brand.name)}" />` : "";
+}
+
+async function handleSaveBrand() {
+  const name = newBrandName.value.trim();
+  if (!name) {
+    showStatus("الرجاء كتابة اسم الماركة الجديدة.", "error");
+    return;
+  }
+
+  showStatus("جارٍ حفظ الماركة...", "info");
+  try {
+    let logo = makeBrandLogo(name.slice(0, 2).toUpperCase(), "#607d8b");
+    const file = newBrandLogoFile.files[0];
+    if (file) {
+      const path = `brands/${Date.now()}-${file.name}`;
+      const ref = storageRef(storage, path);
+      await uploadBytes(ref, file);
+      logo = await getDownloadURL(ref);
+    }
+
+    await addDoc(collection(db, BRANDS_COLLECTION), { name, logo });
+    showStatus(`تم حفظ الماركة: ${name}`, "ok");
+    newBrandBox.hidden = true;
+    await loadBrands();
+    brandSelect.value = name;
+    updateBrandLogoPreview();
+  } catch (err) {
+    showStatus(describeFirebaseError(err, "حفظ الماركة"), "error");
+    console.error(err);
+  }
+}
+
+// ---------------- Product image upload ----------------
+
+async function handleImageFileChange() {
+  const file = imageFileInput.files[0];
+  if (!file) return;
+
+  showStatus("جارٍ رفع الصورة...", "info");
+  try {
+    const path = `products/${Date.now()}-${file.name}`;
+    const ref = storageRef(storage, path);
+    await uploadBytes(ref, file);
+    const url = await getDownloadURL(ref);
+    fields.image.value = url;
+    imagePreview.src = url;
+    imagePreview.hidden = false;
+    showStatus("تم رفع الصورة بنجاح.", "ok");
+  } catch (err) {
+    showStatus(describeFirebaseError(err, "رفع الصورة"), "error");
+    console.error(err);
+  }
+}
+
+// ---------------- Firestore: products ----------------
 
 async function loadProducts() {
   showStatus("جارٍ تحميل المنتجات من Firestore...", "info");
@@ -67,7 +208,7 @@ async function loadProducts() {
     statusCard.hidden = true;
     renderTable();
   } catch (err) {
-    showStatus(describeFirestoreError(err, "تحميل المنتجات"), "error");
+    showStatus(describeFirebaseError(err, "تحميل المنتجات"), "error");
     console.error(err);
   }
 }
@@ -79,7 +220,7 @@ async function saveProduct(product, commitMessage) {
     showStatus(`تم الحفظ: ${commitMessage}`, "ok");
     return true;
   } catch (err) {
-    showStatus(describeFirestoreError(err, "الحفظ"), "error");
+    showStatus(describeFirebaseError(err, "الحفظ"), "error");
     console.error(err);
     return false;
   }
@@ -92,7 +233,7 @@ async function patchProduct(id, partial, commitMessage) {
     showStatus(`تم التحديث: ${commitMessage}`, "ok");
     return true;
   } catch (err) {
-    showStatus(describeFirestoreError(err, "التحديث"), "error");
+    showStatus(describeFirebaseError(err, "التحديث"), "error");
     console.error(err);
     return false;
   }
@@ -105,44 +246,9 @@ async function removeProduct(id, commitMessage) {
     showStatus(`تم الحذف: ${commitMessage}`, "ok");
     return true;
   } catch (err) {
-    showStatus(describeFirestoreError(err, "الحذف"), "error");
+    showStatus(describeFirebaseError(err, "الحذف"), "error");
     console.error(err);
     return false;
-  }
-}
-
-function describeFirestoreError(err, action) {
-  const code = err && err.code ? err.code : "";
-  if (code === "permission-denied") {
-    return `تم رفض ${action}: قواعد أمان Firestore (Security Rules) لا تسمح بهذه العملية. راجع قسم الأمان في README.`;
-  }
-  if (code === "unavailable" || err instanceof TypeError) {
-    return `فشل الاتصال بـ Firestore أثناء ${action}. تحقق من اتصالك بالإنترنت وحاول مجدداً.`;
-  }
-  return `خطأ أثناء ${action}: ${err && err.message ? err.message : "خطأ غير معروف"}`;
-}
-
-async function handleSeed() {
-  showStatus("جارٍ استيراد data/products.json...", "info");
-  try {
-    const res = await fetch("../data/products.json");
-    const seedData = await res.json();
-    let imported = 0;
-    let skipped = 0;
-    for (const item of seedData) {
-      const existing = await getDoc(doc(db, PRODUCTS_COLLECTION, item.id));
-      if (existing.exists()) {
-        skipped++;
-        continue;
-      }
-      await setDoc(doc(db, PRODUCTS_COLLECTION, item.id), item);
-      imported++;
-    }
-    showStatus(`تم الاستيراد: ${imported} منتج جديد، تم تخطي ${skipped} موجود مسبقاً.`, "ok");
-    await loadProducts();
-  } catch (err) {
-    showStatus(describeFirestoreError(err, "الاستيراد"), "error");
-    console.error(err);
   }
 }
 
@@ -195,7 +301,7 @@ async function handleFormSubmit(e) {
     name: fields.name.value.trim(),
     image: fields.image.value.trim() || "assets/images/placeholder.svg",
     price: Number(fields.price.value),
-    brand: fields.brand.value.trim(),
+    brand: fields.brand.value,
     type: fields.type.value,
     capacity: fields.capacity.value.trim(),
     power_saving: fields.power_saving.checked,
@@ -229,9 +335,14 @@ function startEdit(id) {
   editingId = id;
   fields.id.value = p.id;
   fields.name.value = p.name;
+  ensureBrandOptionExists(p.brand);
   fields.brand.value = p.brand;
+  updateBrandLogoPreview();
   fields.price.value = p.price;
   fields.image.value = p.image;
+  imagePreview.src = p.image;
+  imagePreview.hidden = !p.image;
+  imageFileInput.value = "";
   fields.type.value = p.type;
   fields.capacity.value = p.capacity;
   fields.mode.value = p.mode;
@@ -250,6 +361,12 @@ function resetForm() {
   productForm.reset();
   fields.id.value = "";
   fields.in_stock.checked = true;
+  fields.image.value = "";
+  imagePreview.hidden = true;
+  imagePreview.src = "";
+  imageFileInput.value = "";
+  newBrandBox.hidden = true;
+  populateBrandSelect();
   formTitle.textContent = "إضافة منتج جديد";
   cancelEditBtn.hidden = true;
 }
