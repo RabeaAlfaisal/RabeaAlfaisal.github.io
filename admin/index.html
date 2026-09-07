@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>لوحة إدارة المنتجات</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <header class="admin-header">
+    <h1>لوحة إدارة المنتجات</h1>
+  </header>
+
+  <div class="admin-warning">
+    ⚠️ هذه الصفحة غير معروضة في قوائم الموقع وتم استبعادها من robots.txt، لكنها ليست محمية بكلمة مرور أو تسجيل
+    دخول. أي شخص يعرف رابطها — بل وأي شخص يفحص كود الموقع أصلاً — يمكنه الكتابة في قاعدة بيانات Firestore طالما
+    قواعد الأمان (Security Rules) تسمح بالكتابة العامة. راجع قسم الأمان في ملف README قبل نشر الموقع فعلياً، وفكّر
+    بإضافة Firebase Authentication لاحقاً إن أردت حماية حقيقية.
+  </div>
+
+  <main>
+    <section class="card" id="statusCard" hidden></section>
+
+    <section class="card" id="seedCard">
+      <h2>استيراد البيانات الأولية</h2>
+      <p style="font-size:0.85rem;color:var(--color-muted)">
+        إذا كانت قاعدة Firestore فارغة، اضغط الزر أدناه لاستيراد المنتجات النموذجية من
+        <code>data/products.json</code> كنقطة بداية. لن يكرر الاستيراد منتجاً موجوداً بنفس المعرّف (id).
+      </p>
+      <button id="seedBtn" class="btn-secondary">استيراد من data/products.json</button>
+    </section>
+
+    <section class="card">
+      <h2 id="formTitle">إضافة منتج جديد</h2>
+      <form id="productForm">
+        <input type="hidden" id="f_id" />
+        <div class="form-grid">
+          <div>
+            <label for="f_name">اسم المنتج</label>
+            <input type="text" id="f_name" required />
+          </div>
+          <div>
+            <label for="f_brand">الماركة</label>
+            <input type="text" id="f_brand" required />
+          </div>
+          <div>
+            <label for="f_price">السعر (ر.س)</label>
+            <input type="number" id="f_price" min="0" step="1" required />
+          </div>
+          <div>
+            <label for="f_image">مسار الصورة</label>
+            <input type="text" id="f_image" placeholder="assets/images/placeholder.svg" />
+          </div>
+          <div>
+            <label for="f_type">النوع</label>
+            <select id="f_type">
+              <option value="سبليت">سبليت</option>
+              <option value="شباك">شباك</option>
+              <option value="كاسيت">كاسيت</option>
+            </select>
+          </div>
+          <div>
+            <label for="f_capacity">السعة</label>
+            <input type="text" id="f_capacity" placeholder="1.5 طن" required />
+          </div>
+          <div>
+            <label for="f_mode">وضع التشغيل</label>
+            <select id="f_mode">
+              <option value="بارد فقط">بارد فقط</option>
+              <option value="حار فقط">حار فقط</option>
+              <option value="حار وبارد">حار وبارد</option>
+            </select>
+          </div>
+          <div>
+            <label for="f_compressor_type">نوع الكمبروسر</label>
+            <select id="f_compressor_type">
+              <option value="انفرتر">انفرتر</option>
+              <option value="عادي">عادي</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="f_description">الوصف</label>
+        <textarea id="f_description"></textarea>
+
+        <div class="checkbox-field">
+          <input type="checkbox" id="f_power_saving" />
+          <label for="f_power_saving">موفر للكهرباء</label>
+        </div>
+        <div class="checkbox-field">
+          <input type="checkbox" id="f_in_stock" checked />
+          <label for="f_in_stock">متوفر في المخزون</label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" id="saveProductBtn">حفظ المنتج</button>
+          <button type="button" class="btn-secondary" id="cancelEditBtn" hidden>إلغاء التعديل</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>كل المنتجات (بما فيها المؤرشفة)</h2>
+      <div class="form-actions" style="margin-bottom:12px">
+        <button id="refreshBtn" class="btn-secondary">تحديث القائمة من Firestore</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>الاسم</th>
+              <th>الماركة</th>
+              <th>السعر</th>
+              <th>النوع</th>
+              <th>الحالة</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="productsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

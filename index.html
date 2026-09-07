@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>متجر المكيفات — سبليت، شباك، كاسيت بأفضل الأسعار</title>
+  <meta name="description" content="متجر متخصص في استيراد وبيع مكيفات سبليت وشباك وكاسيت بأفضل الأسعار في السعودية." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-mark" aria-hidden="true">❄️</span>
+        <span>
+          متجر المكيفات
+          <span class="header-tagline">استيراد وبيع مكيفات سبليت بالجملة والقطاعي</span>
+        </span>
+      </div>
+      <button class="cart-toggle" id="cartToggleBtn" aria-haspopup="true" aria-controls="cartDrawer" aria-label="فتح السلة">
+        🛒 السلة
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>أفضل عروض مكيفات السبليت في السعودية</h1>
+      <p>تصفح تشكيلتنا من المكيفات الموفرة للكهرباء والانفرتر من أشهر الماركات العالمية.</p>
+    </section>
+
+    <section class="filters-bar" aria-label="تصفية وترتيب المنتجات">
+      <div class="filter-field">
+        <label for="filterType">نوع الجهاز</label>
+        <select id="filterType">
+          <option value="">الكل</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="filterMode">وضع التشغيل</label>
+        <select id="filterMode">
+          <option value="">الكل</option>
+          <option value="بارد فقط">بارد فقط</option>
+          <option value="حار فقط">حار فقط</option>
+          <option value="حار وبارد">حار وبارد</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="filterCompressor">نوع الكمبروسر</label>
+        <select id="filterCompressor">
+          <option value="">الكل</option>
+          <option value="انفرتر">انفرتر</option>
+          <option value="عادي">عادي</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="filterPowerSaving">موفر للكهرباء</label>
+        <select id="filterPowerSaving">
+          <option value="">الكل</option>
+          <option value="yes">موفر فقط</option>
+          <option value="no">غير موفر</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="sortBy">ترتيب حسب السعر</label>
+        <select id="sortBy">
+          <option value="default">الافتراضي</option>
+          <option value="price-asc">الأقل سعراً أولاً</option>
+          <option value="price-desc">الأعلى سعراً أولاً</option>
+        </select>
+      </div>
+      <button class="filter-reset" id="resetFiltersBtn" type="button">إعادة تعيين</button>
+    </section>
+
+    <p class="results-count" id="resultsCount"></p>
+
+    <section class="catalog-grid" id="catalogGrid" aria-live="polite">
+      <!-- product cards injected by js/app.js -->
+    </section>
+
+    <p class="empty-state" id="emptyState" hidden>لا توجد منتجات مطابقة لمعايير البحث الحالية.</p>
+  </main>
+
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-label="سلة المشتريات">
+    <div class="cart-header">
+      <h2>سلة المشتريات</h2>
+      <button class="cart-close" id="cartCloseBtn" aria-label="إغلاق السلة">×</button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <!-- cart line items injected by js/app.js -->
+    </div>
+    <div class="cart-footer">
+      <div class="cart-total-row">
+        <span>الإجمالي</span>
+        <span id="cartTotal">0 ر.س</span>
+      </div>
+      <p class="cart-confirm-note" id="cartConfirmNote" hidden>تم فتح واتساب في نافذة جديدة لإرسال طلبك. السلة لا تزال محفوظة هنا.</p>
+      <button class="whatsapp-btn" id="checkoutBtn" disabled>
+        💬 تأكيد الطلب عبر واتساب
+      </button>
+    </div>
+  </aside>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>
+        <h3>تواصل معنا</h3>
+        <p>واتساب: 0558742544</p>
+        <p>الرياض، المملكة العربية السعودية</p>
+      </div>
+      <div>
+        <h3>عن المتجر</h3>
+        <p>نستورد ونوزع مكيفات سبليت وشباك وكاسيت من أفضل الماركات العالمية بضمان وجودة.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 متجر المكيفات. جميع الحقوق محفوظة.</div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
