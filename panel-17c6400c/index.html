@@ -34,6 +34,10 @@
             <label for="f_price">السعر (ر.س)</label>
             <input type="number" id="f_price" min="0" step="1" required />
           </div>
+          <div>
+            <label for="f_installation_fee">رسوم التركيب (ر.س) — اتركها 0 إذا لا يوجد خيار تركيب</label>
+            <input type="number" id="f_installation_fee" min="0" step="1" value="0" />
+          </div>
           <div hidden>
             <!-- مخفي مؤقتاً: المستخدمون المستهدفون غير تقنيين، ولا يوجد رفع ملف حقيقي حالياً (راجع ملاحظة Storage في README).
                  الصورة الافتراضية حسب نوع الجهاز (js/type-images.js) تُستخدم تلقائياً بدلاً من ذلك. -->

@@ -39,7 +39,8 @@ import { KNOWN_BRANDS } from "./brands.js";
   const filterMode = document.getElementById("filterMode");
   const filterCompressor = document.getElementById("filterCompressor");
   const filterPowerSaving = document.getElementById("filterPowerSaving");
-  const sortBy = document.getElementById("sortBy");
+  const sortByPrice = document.getElementById("sortByPrice");
+  const sortByCapacity = document.getElementById("sortByCapacity");
   const resetFiltersBtn = document.getElementById("resetFiltersBtn");
 
   const cartToggleBtn = document.getElementById("cartToggleBtn");
@@ -116,16 +117,22 @@ import { KNOWN_BRANDS } from "./brands.js";
   }
 
   function bindEvents() {
-    [filterBrand, filterType, filterMode, filterCompressor, filterPowerSaving, sortBy].forEach((el) =>
+    [filterBrand, filterType, filterMode, filterCompressor, sortByPrice, sortByCapacity].forEach((el) =>
       el.addEventListener("change", renderCatalog)
     );
+    filterPowerSaving.addEventListener("click", () => {
+      const isOn = filterPowerSaving.getAttribute("aria-checked") === "true";
+      filterPowerSaving.setAttribute("aria-checked", String(!isOn));
+      renderCatalog();
+    });
     resetFiltersBtn.addEventListener("click", () => {
       filterBrand.value = "";
       filterType.value = "";
       filterMode.value = "";
       filterCompressor.value = "";
-      filterPowerSaving.value = "";
-      sortBy.value = "default";
+      filterPowerSaving.setAttribute("aria-checked", "false");
+      sortByPrice.value = "";
+      sortByCapacity.value = "";
       renderCatalog();
     });
 
@@ -142,11 +149,13 @@ import { KNOWN_BRANDS } from "./brands.js";
     if (filterType.value) list = list.filter((p) => p.type === filterType.value);
     if (filterMode.value) list = list.filter((p) => p.mode === filterMode.value);
     if (filterCompressor.value) list = list.filter((p) => p.compressor_type === filterCompressor.value);
-    if (filterPowerSaving.value === "yes") list = list.filter((p) => p.power_saving === true);
-    if (filterPowerSaving.value === "no") list = list.filter((p) => p.power_saving === false);
+    if (filterPowerSaving.getAttribute("aria-checked") === "true") list = list.filter((p) => p.power_saving === true);
 
-    if (sortBy.value === "price-asc") list.sort((a, b) => a.price - b.price);
-    if (sortBy.value === "price-desc") list.sort((a, b) => b.price - a.price);
+    // ترتيب السعة أولاً كترتيب ثانوي، ثم السعر فوق (الترتيب مستقر فيبقى ترتيب السعة كفاصل عند تساوي السعر)
+    if (sortByCapacity.value === "asc") list.sort((a, b) => (a.capacity_ton ?? 0) - (b.capacity_ton ?? 0));
+    if (sortByCapacity.value === "desc") list.sort((a, b) => (b.capacity_ton ?? 0) - (a.capacity_ton ?? 0));
+    if (sortByPrice.value === "asc") list.sort((a, b) => a.price - b.price);
+    if (sortByPrice.value === "desc") list.sort((a, b) => b.price - a.price);
 
     return list;
   }
@@ -203,6 +212,21 @@ import { KNOWN_BRANDS } from "./brands.js";
           }
         </div>
         <p class="product-price">${formatPrice(product.price)} <small>ر.س</small></p>
+        ${
+          product.installation_fee > 0
+            ? `
+        <div class="installation-toggle" role="radiogroup" aria-label="خيار التركيب">
+          <label>
+            <input type="radio" name="installation-${product.id}" value="no" checked />
+            بدون تركيب
+          </label>
+          <label>
+            <input type="radio" name="installation-${product.id}" value="yes" />
+            مع تركيب (+${formatPrice(product.installation_fee)} ر.س)
+          </label>
+        </div>`
+            : ""
+        }
         <div class="product-actions">
           <div class="qty-control">
             <button type="button" class="qty-decrease" aria-label="تقليل الكمية">−</button>
@@ -231,7 +255,9 @@ import { KNOWN_BRANDS } from "./brands.js";
     if (!outOfStock) {
       card.querySelector(".add-to-cart-btn").addEventListener("click", () => {
         const qty = Math.max(1, parseInt(qtyInput.value || "1", 10) || 1);
-        addToCart(product, qty);
+        const installationChoice = card.querySelector(`input[name="installation-${product.id}"]:checked`);
+        const withInstallation = installationChoice ? installationChoice.value === "yes" : false;
+        addToCart(product, qty, withInstallation);
         qtyInput.value = 1;
       });
     }
@@ -259,15 +285,20 @@ import { KNOWN_BRANDS } from "./brands.js";
     }
   }
 
-  function addToCart(product, qty) {
-    const existing = cart.find((item) => item.id === product.id);
+  function addToCart(product, qty, withInstallation) {
+    const installationFee = withInstallation ? Number(product.installation_fee) || 0 : 0;
+    const lineId = `${product.id}::${withInstallation ? "inst" : "noinst"}`;
+    const existing = cart.find((item) => item.lineId === lineId);
     if (existing) {
       existing.qty += qty;
     } else {
       cart.push({
+        lineId,
         id: product.id,
         model: product.model,
         price: product.price,
+        installation_fee: installationFee,
+        with_installation: !!withInstallation,
         image: product.image,
         type: product.type,
         brand: product.brand,
@@ -283,11 +314,11 @@ import { KNOWN_BRANDS } from "./brands.js";
     openCart();
   }
 
-  function updateQty(id, qty) {
-    const item = cart.find((i) => i.id === id);
+  function updateQty(lineId, qty) {
+    const item = cart.find((i) => i.lineId === lineId);
     if (!item) return;
     if (qty <= 0) {
-      cart = cart.filter((i) => i.id !== id);
+      cart = cart.filter((i) => i.lineId !== lineId);
     } else {
       item.qty = qty;
     }
@@ -295,14 +326,14 @@ import { KNOWN_BRANDS } from "./brands.js";
     renderCart();
   }
 
-  function removeFromCart(id) {
-    cart = cart.filter((i) => i.id !== id);
+  function removeFromCart(lineId) {
+    cart = cart.filter((i) => i.lineId !== lineId);
     saveCart();
     renderCart();
   }
 
   function cartTotal() {
-    return cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+    return cart.reduce((sum, item) => sum + (item.price + (item.installation_fee || 0)) * item.qty, 0);
   }
 
   function cartCount() {
@@ -324,24 +355,26 @@ import { KNOWN_BRANDS } from "./brands.js";
     cart.forEach((item) => {
       const row = document.createElement("div");
       row.className = "cart-item";
+      const unitPrice = item.price + (item.installation_fee || 0);
       row.innerHTML = `
         <img src="${item.image || imageForType(item.type)}" alt="${escapeHtml(item.model)}"
              onerror="this.src='${imageForType(item.type)}'" />
         <div class="cart-item-info">
           <p class="cart-item-name">${escapeHtml(item.model)}</p>
-          <p class="cart-item-price">${formatPrice(item.price)} ر.س ×
+          ${item.with_installation ? '<p class="cart-item-installation">شامل تركيب</p>' : ""}
+          <p class="cart-item-price">${formatPrice(unitPrice)} ر.س ×
             <input type="number" min="0" value="${item.qty}" class="cart-qty-input" style="width:44px" aria-label="الكمية" />
           </p>
           <button type="button" class="cart-item-remove">إزالة</button>
         </div>
-        <div class="cart-item-subtotal">${formatPrice(item.price * item.qty)} ر.س</div>
+        <div class="cart-item-subtotal">${formatPrice(unitPrice * item.qty)} ر.س</div>
       `;
 
       row.querySelector(".cart-qty-input").addEventListener("change", (e) => {
         const val = Math.max(0, parseInt(e.target.value || "0", 10) || 0);
-        updateQty(item.id, val);
+        updateQty(item.lineId, val);
       });
-      row.querySelector(".cart-item-remove").addEventListener("click", () => removeFromCart(item.id));
+      row.querySelector(".cart-item-remove").addEventListener("click", () => removeFromCart(item.lineId));
 
       cartItemsEl.appendChild(row);
     });
@@ -366,6 +399,7 @@ import { KNOWN_BRANDS } from "./brands.js";
       if (item.power_saving) parts.push("موفر للكهرباء");
       const modeShort = MODE_SHORT[item.mode] || item.mode;
       parts.push(modeShort);
+      if (item.with_installation) parts.push("مع تركيب");
       return `${item.qty} ${unit} ${parts.join(" ")}`;
     });
 

@@ -13,7 +13,8 @@
     "compressor_type": "انفرتر",
     "in_stock": true,
     "archived": false,
-    "description": "مكيف سبليت تي سي ال بسعة 1.5 طن، تبريد وتدفئة، تقنية انفرتر موفرة للكهرباء، مناسب لغرف المعيشة المتوسطة."
+    "description": "مكيف سبليت تي سي ال بسعة 1.5 طن، تبريد وتدفئة، تقنية انفرتر موفرة للكهرباء، مناسب لغرف المعيشة المتوسطة.",
+    "installation_fee": 200
   },
   {
     "id": "samsung-15-hc-eco",
@@ -29,7 +30,8 @@
     "compressor_type": "انفرتر",
     "in_stock": true,
     "archived": false,
-    "description": "مكيف سامسونج سبليت موفر للطاقة مع تقنية الانفرتر، تبريد سريع وتشغيل هادئ."
+    "description": "مكيف سامسونج سبليت موفر للطاقة مع تقنية الانفرتر، تبريد سريع وتشغيل هادئ.",
+    "installation_fee": 200
   },
   {
     "id": "lg-2-cold-inv",
@@ -45,7 +47,8 @@
     "compressor_type": "انفرتر",
     "in_stock": true,
     "archived": false,
-    "description": "مكيف إل جي انفرتر بسعة 2 طن للتبريد فقط، مثالي للمناطق الحارة صيفاً."
+    "description": "مكيف إل جي انفرتر بسعة 2 طن للتبريد فقط، مثالي للمناطق الحارة صيفاً.",
+    "installation_fee": 200
   },
   {
     "id": "gree-1-hc-noninv",
@@ -61,7 +64,8 @@
     "compressor_type": "عادي",
     "in_stock": true,
     "archived": false,
-    "description": "مكيف جري سبليت اقتصادي بسعة 1 طن، تبريد وتدفئة، خيار موفر للميزانية."
+    "description": "مكيف جري سبليت اقتصادي بسعة 1 طن، تبريد وتدفئة، خيار موفر للميزانية.",
+    "installation_fee": 200
   },
   {
     "id": "midea-25-hc-inv",
@@ -77,7 +81,8 @@
     "compressor_type": "انفرتر",
     "in_stock": true,
     "archived": false,
-    "description": "مكيف مديا سبليت بسعة 2.5 طن مناسب للصالات الواسعة، تقنية انفرتر موفرة."
+    "description": "مكيف مديا سبليت بسعة 2.5 طن مناسب للصالات الواسعة، تقنية انفرتر موفرة.",
+    "installation_fee": 200
   },
   {
     "id": "tcl-window-15",
@@ -93,7 +98,8 @@
     "compressor_type": "عادي",
     "in_stock": true,
     "archived": false,
-    "description": "مكيف شباك تي سي ال اقتصادي، سهل التركيب، مناسب للغرف الصغيرة."
+    "description": "مكيف شباك تي سي ال اقتصادي، سهل التركيب، مناسب للغرف الصغيرة.",
+    "installation_fee": 100
   },
   {
     "id": "samsung-1-cold-noninv",
@@ -109,7 +115,8 @@
     "compressor_type": "عادي",
     "in_stock": true,
     "archived": false,
-    "description": "مكيف سامسونج سبليت للتبريد فقط، أداء موثوق بسعر اقتصادي."
+    "description": "مكيف سامسونج سبليت للتبريد فقط، أداء موثوق بسعر اقتصادي.",
+    "installation_fee": 200
   },
   {
     "id": "gree-cassette-3-hc",
@@ -125,7 +132,8 @@
     "compressor_type": "انفرتر",
     "in_stock": false,
     "archived": false,
-    "description": "مكيف كاسيت جري تجاري بسعة 3 طن، مناسب للمكاتب والمحلات، تركيب في السقف."
+    "description": "مكيف كاسيت جري تجاري بسعة 3 طن، مناسب للمكاتب والمحلات، تركيب في السقف.",
+    "installation_fee": 500
   },
   {
     "id": "lg-15-hc-inv-2",
@@ -141,7 +149,8 @@
     "compressor_type": "انفرتر",
     "in_stock": true,
     "archived": false,
-    "description": "مكيف إل جي سبليت انفرتر بسعة 1.5 طن، تبريد وتدفئة بكفاءة عالية وتشغيل هادئ."
+    "description": "مكيف إل جي سبليت انفرتر بسعة 1.5 طن، تبريد وتدفئة بكفاءة عالية وتشغيل هادئ.",
+    "installation_fee": 200
   },
   {
     "id": "midea-1-cold-noninv-archived",
@@ -157,6 +166,7 @@
     "compressor_type": "عادي",
     "in_stock": true,
     "archived": true,
-    "description": "عرض سابق منتهي، محفوظ في الأرشيف ولا يظهر للعملاء."
+    "description": "عرض سابق منتهي، محفوظ في الأرشيف ولا يظهر للعملاء.",
+    "installation_fee": 200
   }
 ]

@@ -55,20 +55,26 @@
           <option value="عادي">عادي</option>
         </select>
       </div>
+      <div class="filter-field filter-field-toggle">
+        <label for="filterPowerSaving">موفر للكهرباء فقط</label>
+        <button type="button" class="toggle-switch" id="filterPowerSaving" role="switch" aria-checked="false">
+          <span class="toggle-switch-knob"></span>
+        </button>
+      </div>
       <div class="filter-field">
-        <label for="filterPowerSaving">موفر للكهرباء</label>
-        <select id="filterPowerSaving">
-          <option value="">الكل</option>
-          <option value="yes">موفر فقط</option>
-          <option value="no">غير موفر</option>
+        <label for="sortByPrice">ترتيب حسب السعر</label>
+        <select id="sortByPrice">
+          <option value="">بدون ترتيب</option>
+          <option value="asc">الأقل سعراً أولاً</option>
+          <option value="desc">الأعلى سعراً أولاً</option>
         </select>
       </div>
       <div class="filter-field">
-        <label for="sortBy">ترتيب حسب السعر</label>
-        <select id="sortBy">
-          <option value="default">الافتراضي</option>
-          <option value="price-asc">الأقل سعراً أولاً</option>
-          <option value="price-desc">الأعلى سعراً أولاً</option>
+        <label for="sortByCapacity">ترتيب حسب السعة</label>
+        <select id="sortByCapacity">
+          <option value="">بدون ترتيب</option>
+          <option value="asc">الأصغر سعة أولاً</option>
+          <option value="desc">الأكبر سعة أولاً</option>
         </select>
       </div>
       <button class="filter-reset" id="resetFiltersBtn" type="button">إعادة تعيين</button>

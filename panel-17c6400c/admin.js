@@ -56,6 +56,7 @@ const fields = {
   model: document.getElementById("f_model"),
   brand: brandSelect,
   price: document.getElementById("f_price"),
+  installation_fee: document.getElementById("f_installation_fee"),
   image: document.getElementById("f_image"),
   type: document.getElementById("f_type"),
   capacity_ton: document.getElementById("f_capacity_ton"),
@@ -292,6 +293,7 @@ async function handleFormSubmit(e) {
     model: fields.model.value.trim(),
     image: fields.image.value.trim() || imageForType(fields.type.value),
     price: Number(fields.price.value),
+    installation_fee: Number(fields.installation_fee.value) || 0,
     brand: fields.brand.value,
     type: fields.type.value,
     capacity_ton: Number(fields.capacity_ton.value),
@@ -331,6 +333,7 @@ function startEdit(id) {
   fields.brand.value = p.brand;
   updateBrandLogoPreview();
   fields.price.value = p.price;
+  fields.installation_fee.value = p.installation_fee || 0;
   fields.image.value = p.image;
   fields.type.value = p.type;
   imagePreview.src = toAdminPreviewSrc(p.image || imageForType(p.type));
