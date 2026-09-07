@@ -56,7 +56,8 @@ const fields = {
   price: document.getElementById("f_price"),
   image: document.getElementById("f_image"),
   type: document.getElementById("f_type"),
-  capacity: document.getElementById("f_capacity"),
+  capacity_ton: document.getElementById("f_capacity_ton"),
+  capacity_btu: document.getElementById("f_capacity_btu"),
   mode: document.getElementById("f_mode"),
   compressor_type: document.getElementById("f_compressor_type"),
   description: document.getElementById("f_description"),
@@ -303,7 +304,8 @@ async function handleFormSubmit(e) {
     price: Number(fields.price.value),
     brand: fields.brand.value,
     type: fields.type.value,
-    capacity: fields.capacity.value.trim(),
+    capacity_ton: Number(fields.capacity_ton.value),
+    capacity_btu: Number(fields.capacity_btu.value),
     power_saving: fields.power_saving.checked,
     mode: fields.mode.value,
     compressor_type: fields.compressor_type.value,
@@ -344,7 +346,8 @@ function startEdit(id) {
   imagePreview.hidden = !p.image;
   imageFileInput.value = "";
   fields.type.value = p.type;
-  fields.capacity.value = p.capacity;
+  fields.capacity_ton.value = p.capacity_ton;
+  fields.capacity_btu.value = p.capacity_btu;
   fields.mode.value = p.mode;
   fields.compressor_type.value = p.compressor_type;
   fields.description.value = p.description || "";

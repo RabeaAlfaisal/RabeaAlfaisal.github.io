@@ -159,7 +159,7 @@ import { firebaseConfig, PRODUCTS_COLLECTION } from "./firebase-config.js";
         <h2 class="product-name">${escapeHtml(product.name)}</h2>
         <div class="badge-row">
           <span class="badge badge-type">${escapeHtml(product.type)}</span>
-          <span class="badge">${escapeHtml(product.capacity)}</span>
+          <span class="badge">${formatCapacity(product)}</span>
           <span class="badge badge-mode">${escapeHtml(modeShort)}</span>
           <span class="badge ${product.compressor_type === "انفرتر" ? "badge-inverter" : ""}">
             ${product.compressor_type === "انفرتر" ? "⚡ انفرتر" : "كمبروسر عادي"}
@@ -239,7 +239,8 @@ import { firebaseConfig, PRODUCTS_COLLECTION } from "./firebase-config.js";
         image: product.image,
         type: product.type,
         brand: product.brand,
-        capacity: product.capacity,
+        capacity_ton: product.capacity_ton,
+        capacity_btu: product.capacity_btu,
         power_saving: product.power_saving,
         mode: product.mode,
         qty: qty,
@@ -329,7 +330,7 @@ import { firebaseConfig, PRODUCTS_COLLECTION } from "./firebase-config.js";
   function buildOrderMessage() {
     const lines = cart.map((item) => {
       const unit = item.qty === 1 ? "مكيف" : "مكيفات";
-      const parts = [item.type, item.brand, item.capacity];
+      const parts = [item.type, item.brand, `${item.capacity_ton} طن`];
       if (item.power_saving) parts.push("موفر للكهرباء");
       const modeShort = MODE_SHORT[item.mode] || item.mode;
       parts.push(modeShort);
@@ -348,6 +349,13 @@ import { firebaseConfig, PRODUCTS_COLLECTION } from "./firebase-config.js";
   }
 
   // ---------- Helpers ----------
+
+  function formatCapacity(product) {
+    const parts = [];
+    if (product.capacity_ton != null) parts.push(`${product.capacity_ton} طن`);
+    if (product.capacity_btu != null) parts.push(`${formatPrice(product.capacity_btu)} BTU`);
+    return parts.join(" / ");
+  }
 
   function formatPrice(value) {
     return Number(value).toLocaleString("ar-SA");
