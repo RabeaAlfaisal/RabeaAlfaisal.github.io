@@ -53,7 +53,7 @@ const imagePreview = document.getElementById("imagePreview");
 
 const fields = {
   id: document.getElementById("f_id"),
-  name: document.getElementById("f_name"),
+  model: document.getElementById("f_model"),
   brand: brandSelect,
   price: document.getElementById("f_price"),
   image: document.getElementById("f_image"),
@@ -258,7 +258,7 @@ function renderTable() {
     if (p.archived) tr.className = "archived-row";
 
     tr.innerHTML = `
-      <td>${escapeHtml(p.name)}</td>
+      <td>${escapeHtml(p.model)}</td>
       <td>${escapeHtml(p.brand)}</td>
       <td>${escapeHtml(String(p.price))} ر.س</td>
       <td>${escapeHtml(p.type)}</td>
@@ -289,7 +289,7 @@ async function handleFormSubmit(e) {
 
   const product = {
     id: fields.id.value || generateId(),
-    name: fields.name.value.trim(),
+    model: fields.model.value.trim(),
     image: fields.image.value.trim() || imageForType(fields.type.value),
     price: Number(fields.price.value),
     brand: fields.brand.value,
@@ -306,14 +306,14 @@ async function handleFormSubmit(e) {
   if (editingId) {
     const existing = products.find((p) => p.id === editingId);
     product.archived = existing ? !!existing.archived : false;
-    const ok = await saveProduct(product, `تعديل ${product.name}`);
+    const ok = await saveProduct(product, `تعديل ${product.model}`);
     if (ok) {
       resetForm();
       await loadProducts();
     }
   } else {
     product.archived = false;
-    const ok = await saveProduct(product, `إضافة منتج ${product.name}`);
+    const ok = await saveProduct(product, `إضافة منتج ${product.model}`);
     if (ok) {
       resetForm();
       await loadProducts();
@@ -326,7 +326,7 @@ function startEdit(id) {
   if (!p) return;
   editingId = id;
   fields.id.value = p.id;
-  fields.name.value = p.name;
+  fields.model.value = p.model;
   ensureBrandOptionExists(p.brand);
   fields.brand.value = p.brand;
   updateBrandLogoPreview();
@@ -343,7 +343,7 @@ function startEdit(id) {
   fields.power_saving.checked = !!p.power_saving;
   fields.in_stock.checked = p.in_stock !== false;
 
-  formTitle.textContent = `تعديل منتج: ${p.name}`;
+  formTitle.textContent = `تعديل منتج: ${p.model}`;
   cancelEditBtn.hidden = false;
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -366,16 +366,16 @@ async function toggleArchive(id) {
   const p = products.find((x) => x.id === id);
   if (!p) return;
   const newArchived = !p.archived;
-  const ok = await patchProduct(id, { archived: newArchived }, `${newArchived ? "أرشفة" : "إلغاء أرشفة"} ${p.name}`);
+  const ok = await patchProduct(id, { archived: newArchived }, `${newArchived ? "أرشفة" : "إلغاء أرشفة"} ${p.model}`);
   if (ok) await loadProducts();
 }
 
 async function deleteProduct(id) {
   const p = products.find((x) => x.id === id);
   if (!p) return;
-  const confirmed = confirm(`هل أنت متأكد من حذف "${p.name}" نهائياً؟ لا يمكن التراجع عن هذا الإجراء.`);
+  const confirmed = confirm(`هل أنت متأكد من حذف "${p.model}" نهائياً؟ لا يمكن التراجع عن هذا الإجراء.`);
   if (!confirmed) return;
-  const ok = await removeProduct(id, `حذف ${p.name}`);
+  const ok = await removeProduct(id, `حذف ${p.model}`);
   if (ok) await loadProducts();
 }
 

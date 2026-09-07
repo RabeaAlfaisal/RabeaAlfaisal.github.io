@@ -242,6 +242,20 @@ button {
   flex: 1;
 }
 
+.product-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.product-brand-logo {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
 .product-brand {
   font-size: 0.78rem;
   color: var(--color-primary);

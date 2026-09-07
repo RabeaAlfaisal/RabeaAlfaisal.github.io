@@ -14,5 +14,11 @@ service cloud.firestore {
       // لحماية فعلية: فعّل Firebase Authentication وغيّر السطر التالي إلى: allow write: if request.auth != null;
       allow write: if true;
     }
+
+    match /brands/{brandId} {
+      // نفس المنطق: قراءة عامة (شعارات الماركات تظهر في الكتالوج ولوحة الإدارة)، وكتابة عامة لنفس السبب أعلاه.
+      allow read: if true;
+      allow write: if true;
+    }
   }
 }

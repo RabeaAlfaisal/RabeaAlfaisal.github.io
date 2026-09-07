@@ -9,14 +9,18 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { firebaseConfig, PRODUCTS_COLLECTION } from "./firebase-config.js";
 import { imageForType } from "./type-images.js";
+import { KNOWN_BRANDS } from "./brands.js";
 
 (function () {
   "use strict";
 
   const CART_STORAGE_KEY = "ac_store_cart";
+  const BRANDS_COLLECTION = "brands";
 
   const firebaseApp = initializeApp(firebaseConfig);
   const db = getFirestore(firebaseApp);
+
+  let brandLogoByName = {};
 
   const MODE_SHORT = {
     "بارد فقط": "بارد",
@@ -64,11 +68,31 @@ import { imageForType } from "./type-images.js";
       return;
     }
 
+    await loadBrandLogos();
     populateBrandFilter();
     populateTypeFilter();
     bindEvents();
     renderCatalog();
     renderCart();
+  }
+
+  async function loadBrandLogos() {
+    brandLogoByName = {};
+    KNOWN_BRANDS.forEach((b) => {
+      brandLogoByName[b.name] = b.logo;
+    });
+    try {
+      const snap = await getDocs(collection(db, BRANDS_COLLECTION));
+      snap.docs.forEach((d) => {
+        const data = d.data();
+        if (data.name && data.logo && !brandLogoByName[data.name]) {
+          brandLogoByName[data.name] = data.logo;
+        }
+      });
+    } catch (err) {
+      // القراءة العامة يجب أن تعمل حتى لو فشلت الكتابة؛ نكتفي بشعارات الماركات المعروفة محلياً عند الفشل
+      console.error("Failed to load brand logos from Firestore", err);
+    }
   }
 
   function populateBrandFilter() {
@@ -151,13 +175,20 @@ import { imageForType } from "./type-images.js";
 
     card.innerHTML = `
       <div class="product-image-wrap">
-        <img src="${product.image || imageForType(product.type)}" alt="${escapeHtml(product.name)}"
+        <img src="${product.image || imageForType(product.type)}" alt="${escapeHtml(product.model)}"
              onerror="this.src='${imageForType(product.type)}'" />
         ${outOfStock ? '<span class="badge-oos">غير متوفر حالياً</span>' : ""}
       </div>
       <div class="product-body">
-        <span class="product-brand">${escapeHtml(product.brand)}</span>
-        <h2 class="product-name">${escapeHtml(product.name)}</h2>
+        <div class="product-brand-row">
+          ${
+            brandLogoByName[product.brand]
+              ? `<img class="product-brand-logo" src="${brandLogoByName[product.brand]}" alt="شعار ${escapeHtml(product.brand)}" />`
+              : ""
+          }
+          <span class="product-brand">${escapeHtml(product.brand)}</span>
+        </div>
+        <h2 class="product-name">${escapeHtml(product.model)}</h2>
         <div class="badge-row">
           <span class="badge badge-type">${escapeHtml(product.type)}</span>
           <span class="badge">${formatCapacity(product)}</span>
@@ -235,7 +266,7 @@ import { imageForType } from "./type-images.js";
     } else {
       cart.push({
         id: product.id,
-        name: product.name,
+        model: product.model,
         price: product.price,
         image: product.image,
         type: product.type,
@@ -294,10 +325,10 @@ import { imageForType } from "./type-images.js";
       const row = document.createElement("div");
       row.className = "cart-item";
       row.innerHTML = `
-        <img src="${item.image || imageForType(item.type)}" alt="${escapeHtml(item.name)}"
+        <img src="${item.image || imageForType(item.type)}" alt="${escapeHtml(item.model)}"
              onerror="this.src='${imageForType(item.type)}'" />
         <div class="cart-item-info">
-          <p class="cart-item-name">${escapeHtml(item.name)}</p>
+          <p class="cart-item-name">${escapeHtml(item.model)}</p>
           <p class="cart-item-price">${formatPrice(item.price)} ر.س ×
             <input type="number" min="0" value="${item.qty}" class="cart-qty-input" style="width:44px" aria-label="الكمية" />
           </p>

@@ -1,10 +1,10 @@
 [
   {
     "id": "tcl-15-hc-inv",
-    "name": "مكيف سبليت تي سي ال 1.5 طن انفرتر حار بارد",
+    "model": "TCL2963Xs23D",
     "image": "assets/images/ac-split.svg",
     "price": 1450,
-    "brand": "TCL",
+    "brand": "تي سي ال",
     "type": "سبليت",
     "capacity_ton": 1.5,
     "capacity_btu": 18000,
@@ -17,7 +17,7 @@
   },
   {
     "id": "samsung-15-hc-eco",
-    "name": "مكيف سبليت سامسونج 1.5 طن موفر للكهرباء حار بارد",
+    "model": "AR18TXHZAWKNGV",
     "image": "assets/images/ac-split.svg",
     "price": 1850,
     "brand": "سامسونج",
@@ -33,7 +33,7 @@
   },
   {
     "id": "lg-2-cold-inv",
-    "name": "مكيف سبليت إل جي 2 طن انفرتر بارد فقط",
+    "model": "S4-W24KL3PA",
     "image": "assets/images/ac-split.svg",
     "price": 2100,
     "brand": "إل جي",
@@ -49,7 +49,7 @@
   },
   {
     "id": "gree-1-hc-noninv",
-    "name": "مكيف سبليت جري 1 طن عادي حار بارد",
+    "model": "GWH12ACC-K6DNA1A",
     "image": "assets/images/ac-split.svg",
     "price": 980,
     "brand": "جري",
@@ -65,7 +65,7 @@
   },
   {
     "id": "midea-25-hc-inv",
-    "name": "مكيف سبليت مديا 2.5 طن انفرتر حار بارد",
+    "model": "MSMA-30HRFN8",
     "image": "assets/images/ac-split.svg",
     "price": 2650,
     "brand": "مديا",
@@ -81,10 +81,10 @@
   },
   {
     "id": "tcl-window-15",
-    "name": "مكيف شباك تي سي ال 1.5 طن بارد فقط",
+    "model": "TAC-18CHSA/XAB1",
     "image": "assets/images/ac-window.svg",
     "price": 750,
-    "brand": "TCL",
+    "brand": "تي سي ال",
     "type": "شباك",
     "capacity_ton": 1.5,
     "capacity_btu": 18000,
@@ -97,7 +97,7 @@
   },
   {
     "id": "samsung-1-cold-noninv",
-    "name": "مكيف سبليت سامسونج 1 طن عادي بارد فقط",
+    "model": "AW12ACT",
     "image": "assets/images/ac-split.svg",
     "price": 1050,
     "brand": "سامسونج",
@@ -113,7 +113,7 @@
   },
   {
     "id": "gree-cassette-3-hc",
-    "name": "مكيف كاسيت جري 3 طن انفرتر حار بارد",
+    "model": "GKH36K3FI",
     "image": "assets/images/ac-cassette.svg",
     "price": 4200,
     "brand": "جري",
@@ -129,7 +129,7 @@
   },
   {
     "id": "lg-15-hc-inv-2",
-    "name": "مكيف سبليت إل جي 1.5 طن انفرتر حار بارد",
+    "model": "S4-Q12JA3QC",
     "image": "assets/images/ac-split.svg",
     "price": 1990,
     "brand": "إل جي",
@@ -145,7 +145,7 @@
   },
   {
     "id": "midea-1-cold-noninv-archived",
-    "name": "مكيف سبليت مديا 1 طن عادي بارد فقط (عرض سابق)",
+    "model": "MSA1-12HRN1",
     "image": "assets/images/ac-split.svg",
     "price": 890,
     "brand": "مديا",
