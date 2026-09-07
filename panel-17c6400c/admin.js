@@ -1,4 +1,6 @@
-// لوحة إدارة المنتجات — تتعامل مباشرة مع Firestore و Firebase Storage (بدون خادم خلفي)
+// لوحة إدارة المنتجات — تتعامل مباشرة مع Firestore (بدون خادم خلفي)
+// ملاحظة: لا نستخدم Firebase Storage عمداً لأنه يتطلب خطة Blaze المدفوعة على هذا المشروع.
+// صورة المنتج وشعار الماركة يُكتبان كمسار/رابط نصي بدلاً من رفع ملف.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
   getFirestore,
@@ -10,12 +12,6 @@ import {
   deleteDoc,
   addDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import {
-  getStorage,
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 import { firebaseConfig, PRODUCTS_COLLECTION } from "../js/firebase-config.js";
 import { KNOWN_BRANDS, makeBrandLogo } from "../js/brands.js";
 
@@ -24,7 +20,6 @@ const BTU_PER_TON = 12000;
 
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
-const storage = getStorage(firebaseApp);
 
 let products = [];
 let allBrands = [];
@@ -43,11 +38,9 @@ const brandLogoPreview = document.getElementById("brandLogoPreview");
 const addBrandToggleBtn = document.getElementById("addBrandToggleBtn");
 const newBrandBox = document.getElementById("newBrandBox");
 const newBrandName = document.getElementById("newBrandName");
-const newBrandLogoFile = document.getElementById("newBrandLogoFile");
 const saveBrandBtn = document.getElementById("saveBrandBtn");
 const cancelBrandBtn = document.getElementById("cancelBrandBtn");
 
-const imageFileInput = document.getElementById("f_image_file");
 const imagePreview = document.getElementById("imagePreview");
 
 const fields = {
@@ -75,13 +68,16 @@ async function init() {
   addBrandToggleBtn.addEventListener("click", () => {
     newBrandBox.hidden = false;
     newBrandName.value = "";
-    newBrandLogoFile.value = "";
   });
   cancelBrandBtn.addEventListener("click", () => {
     newBrandBox.hidden = true;
   });
   saveBrandBtn.addEventListener("click", handleSaveBrand);
-  imageFileInput.addEventListener("change", handleImageFileChange);
+  fields.image.addEventListener("input", () => {
+    const url = fields.image.value.trim();
+    imagePreview.src = url || "assets/images/placeholder.svg";
+    imagePreview.hidden = !url;
+  });
 
   fields.capacity_ton.addEventListener("input", () => {
     const ton = parseFloat(fields.capacity_ton.value);
@@ -103,26 +99,13 @@ function showStatus(message, type) {
 
 function describeFirebaseError(err, action) {
   const code = err && err.code ? err.code : "";
-  if (err && err.message === "UPLOAD_TIMEOUT") {
-    return `${action} توقّف بدون استجابة بعد 20 ثانية. الغالب أن Firebase Storage غير مُفعّل لهذا المشروع بعد — افتح Firebase Console → Storage واضغط "Get started" لإنشاء الـ bucket، ثم انشر storage.rules وحاول مجدداً.`;
-  }
-  if (code === "permission-denied" || code === "storage/unauthorized") {
+  if (code === "permission-denied") {
     return `تم رفض ${action}: قواعد الأمان (Security Rules) لا تسمح بهذه العملية. راجع قسم الأمان في README.`;
-  }
-  if (code === "storage/unknown" || code === "storage/retry-limit-exceeded") {
-    return `${action} فشل: تعذّر الوصول إلى Firebase Storage. تأكد أنه مُفعّل للمشروع من Firebase Console → Storage.`;
   }
   if (code === "unavailable" || err instanceof TypeError) {
     return `فشل الاتصال بالشبكة أثناء ${action}. تحقق من اتصالك بالإنترنت وحاول مجدداً.`;
   }
   return `خطأ أثناء ${action}: ${err && err.message ? err.message : "خطأ غير معروف"}`;
-}
-
-function withTimeout(promise, ms) {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => setTimeout(() => reject(new Error("UPLOAD_TIMEOUT")), ms)),
-  ]);
 }
 
 // ---------------- Brands ----------------
@@ -179,15 +162,7 @@ async function handleSaveBrand() {
 
   showStatus("جارٍ حفظ الماركة...", "info");
   try {
-    let logo = makeBrandLogo(name.slice(0, 2).toUpperCase(), "#607d8b");
-    const file = newBrandLogoFile.files[0];
-    if (file) {
-      const path = `brands/${Date.now()}-${file.name}`;
-      const ref = storageRef(storage, path);
-      await withTimeout(uploadBytes(ref, file), 20000);
-      logo = await withTimeout(getDownloadURL(ref), 20000);
-    }
-
+    const logo = makeBrandLogo(name.slice(0, 2).toUpperCase(), "#607d8b");
     await addDoc(collection(db, BRANDS_COLLECTION), { name, logo });
     showStatus(`تم حفظ الماركة: ${name}`, "ok");
     newBrandBox.hidden = true;
@@ -196,28 +171,6 @@ async function handleSaveBrand() {
     updateBrandLogoPreview();
   } catch (err) {
     showStatus(describeFirebaseError(err, "حفظ الماركة"), "error");
-    console.error(err);
-  }
-}
-
-// ---------------- Product image upload ----------------
-
-async function handleImageFileChange() {
-  const file = imageFileInput.files[0];
-  if (!file) return;
-
-  showStatus("جارٍ رفع الصورة...", "info");
-  try {
-    const path = `products/${Date.now()}-${file.name}`;
-    const ref = storageRef(storage, path);
-    await withTimeout(uploadBytes(ref, file), 20000);
-    const url = await withTimeout(getDownloadURL(ref), 20000);
-    fields.image.value = url;
-    imagePreview.src = url;
-    imagePreview.hidden = false;
-    showStatus("تم رفع الصورة بنجاح.", "ok");
-  } catch (err) {
-    showStatus(describeFirebaseError(err, "رفع الصورة"), "error");
     console.error(err);
   }
 }
@@ -365,9 +318,8 @@ function startEdit(id) {
   updateBrandLogoPreview();
   fields.price.value = p.price;
   fields.image.value = p.image;
-  imagePreview.src = p.image;
+  imagePreview.src = p.image || "assets/images/placeholder.svg";
   imagePreview.hidden = !p.image;
-  imageFileInput.value = "";
   fields.type.value = p.type;
   fields.capacity_ton.value = p.capacity_ton;
   fields.capacity_btu.value = p.capacity_btu;
@@ -390,7 +342,6 @@ function resetForm() {
   fields.image.value = "";
   imagePreview.hidden = true;
   imagePreview.src = "";
-  imageFileInput.value = "";
   newBrandBox.hidden = true;
   populateBrandSelect();
   formTitle.textContent = "إضافة منتج جديد";

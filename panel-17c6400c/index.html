@@ -35,9 +35,8 @@
             <input type="number" id="f_price" min="0" step="1" required />
           </div>
           <div>
-            <label for="f_image_file">صورة المنتج</label>
-            <input type="file" id="f_image_file" accept="image/*" />
-            <input type="hidden" id="f_image" />
+            <label for="f_image">مسار الصورة</label>
+            <input type="text" id="f_image" placeholder="assets/images/placeholder.svg" />
             <img id="imagePreview" class="image-preview" alt="معاينة صورة المنتج" hidden />
           </div>
           <div>
@@ -94,8 +93,7 @@
       <div id="newBrandBox" class="card" hidden>
         <label for="newBrandName">اسم الماركة الجديدة</label>
         <input type="text" id="newBrandName" />
-        <label for="newBrandLogoFile">شعار الماركة (اختياري — سيتم توليد شعار افتراضي إن لم ترفع صورة)</label>
-        <input type="file" id="newBrandLogoFile" accept="image/*" />
+        <p style="font-size:0.85rem;color:var(--color-muted);margin-top:-6px">سيُولَّد شعار افتراضي تلقائياً من اسم الماركة.</p>
         <div class="form-actions">
           <button type="button" class="btn-primary btn-small" id="saveBrandBtn">حفظ الماركة</button>
           <button type="button" class="btn-secondary btn-small" id="cancelBrandBtn">إلغاء</button>
