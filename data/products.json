@@ -1,7 +1,7 @@
 [
   {
     "id": "tcl-15-hc-inv",
-    "model": "TCL2963Xs23D",
+    "model": "TAC-18CSU/ZIM",
     "image": "assets/images/ac-split.svg",
     "price": 1450,
     "brand": "تي سي ال",
@@ -81,7 +81,7 @@
   },
   {
     "id": "tcl-window-15",
-    "model": "TAC-18CHSA/XAB1",
+    "model": "TAC-18CWU/ZIM",
     "image": "assets/images/ac-window.svg",
     "price": 750,
     "brand": "تي سي ال",
