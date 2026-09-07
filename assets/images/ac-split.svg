@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <rect width="400" height="300" fill="#eef2f3"/>
+  <rect x="0" y="0" width="400" height="300" fill="#dfe7ea"/>
+  <!-- wall unit body -->
+  <rect x="70" y="70" width="260" height="66" rx="14" fill="#ffffff" stroke="#a9bcc7" stroke-width="2"/>
+  <rect x="70" y="70" width="260" height="18" rx="9" fill="#f4f7f8"/>
+  <!-- indicator light -->
+  <circle cx="300" cy="90" r="4" fill="#0f6e5c"/>
+  <!-- vent slats -->
+  <rect x="90" y="112" width="220" height="6" rx="3" fill="#c7d3d9"/>
+  <rect x="90" y="122" width="220" height="6" rx="3" fill="#c7d3d9"/>
+  <!-- airflow lines -->
+  <path d="M120 140 Q140 175 110 205" fill="none" stroke="#7fb8ac" stroke-width="4" stroke-linecap="round"/>
+  <path d="M200 140 Q220 180 195 215" fill="none" stroke="#7fb8ac" stroke-width="4" stroke-linecap="round"/>
+  <path d="M280 140 Q300 175 270 205" fill="none" stroke="#7fb8ac" stroke-width="4" stroke-linecap="round"/>
+  <!-- snowflake -->
+  <g transform="translate(200,235)" stroke="#0f6e5c" stroke-width="3" stroke-linecap="round">
+    <line x1="0" y1="-16" x2="0" y2="16"/>
+    <line x1="-14" y1="-8" x2="14" y2="8"/>
+    <line x1="14" y1="-8" x2="-14" y2="8"/>
+  </g>
+</svg>

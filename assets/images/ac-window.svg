@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <rect width="400" height="300" fill="#eef2f3"/>
+  <!-- outer wall -->
+  <rect x="0" y="0" width="400" height="300" fill="#dfe7ea"/>
+  <!-- window frame -->
+  <rect x="60" y="40" width="280" height="180" rx="6" fill="#f4f7f8" stroke="#a9bcc7" stroke-width="4"/>
+  <line x1="200" y1="40" x2="200" y2="220" stroke="#a9bcc7" stroke-width="4"/>
+  <line x1="60" y1="130" x2="340" y2="130" stroke="#a9bcc7" stroke-width="4"/>
+  <!-- glass pane top -->
+  <rect x="68" y="48" width="264" height="74" fill="#e3edf0"/>
+  <!-- AC unit box sitting in bottom half of window -->
+  <rect x="70" y="140" width="260" height="72" rx="8" fill="#ffffff" stroke="#8fa5b3" stroke-width="2"/>
+  <rect x="86" y="156" width="70" height="40" rx="4" fill="#c7d3d9"/>
+  <rect x="166" y="156" width="70" height="40" rx="4" fill="#c7d3d9"/>
+  <circle cx="290" cy="176" r="10" fill="#0f6e5c"/>
+  <!-- airflow -->
+  <path d="M100 216 Q90 245 65 260" fill="none" stroke="#7fb8ac" stroke-width="4" stroke-linecap="round"/>
+  <path d="M200 216 Q200 248 200 262" fill="none" stroke="#7fb8ac" stroke-width="4" stroke-linecap="round"/>
+  <path d="M300 216 Q310 245 335 260" fill="none" stroke="#7fb8ac" stroke-width="4" stroke-linecap="round"/>
+</svg>

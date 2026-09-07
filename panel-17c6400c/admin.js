@@ -14,9 +14,17 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { firebaseConfig, PRODUCTS_COLLECTION } from "../js/firebase-config.js";
 import { KNOWN_BRANDS, makeBrandLogo } from "../js/brands.js";
+import { imageForType } from "../js/type-images.js";
 
 const BRANDS_COLLECTION = "brands";
 const BTU_PER_TON = 12000;
+
+// المسارات المخزَّنة (مثل "assets/images/...") صحيحة بالنسبة لجذر الموقع (index.html)،
+// لكن هذه الصفحة نفسها داخل مجلد فرعي، فتحتاج بادئة "../" لتُعرض بشكل صحيح هنا فقط.
+function toAdminPreviewSrc(path) {
+  if (!path || /^(https?:)?\/\//.test(path) || path.startsWith("../")) return path;
+  return "../" + path;
+}
 
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
@@ -75,8 +83,14 @@ async function init() {
   saveBrandBtn.addEventListener("click", handleSaveBrand);
   fields.image.addEventListener("input", () => {
     const url = fields.image.value.trim();
-    imagePreview.src = url || "assets/images/placeholder.svg";
-    imagePreview.hidden = !url;
+    imagePreview.src = toAdminPreviewSrc(url || imageForType(fields.type.value));
+    imagePreview.hidden = false;
+  });
+  fields.type.addEventListener("change", () => {
+    if (!fields.image.value.trim()) {
+      imagePreview.src = toAdminPreviewSrc(imageForType(fields.type.value));
+      imagePreview.hidden = false;
+    }
   });
 
   fields.capacity_ton.addEventListener("input", () => {
@@ -276,7 +290,7 @@ async function handleFormSubmit(e) {
   const product = {
     id: fields.id.value || generateId(),
     name: fields.name.value.trim(),
-    image: fields.image.value.trim() || "assets/images/placeholder.svg",
+    image: fields.image.value.trim() || imageForType(fields.type.value),
     price: Number(fields.price.value),
     brand: fields.brand.value,
     type: fields.type.value,
@@ -318,9 +332,9 @@ function startEdit(id) {
   updateBrandLogoPreview();
   fields.price.value = p.price;
   fields.image.value = p.image;
-  imagePreview.src = p.image || "assets/images/placeholder.svg";
-  imagePreview.hidden = !p.image;
   fields.type.value = p.type;
+  imagePreview.src = toAdminPreviewSrc(p.image || imageForType(p.type));
+  imagePreview.hidden = false;
   fields.capacity_ton.value = p.capacity_ton;
   fields.capacity_btu.value = p.capacity_btu;
   fields.mode.value = p.mode;

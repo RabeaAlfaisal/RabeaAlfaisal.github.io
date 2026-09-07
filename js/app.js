@@ -8,6 +8,7 @@ import {
   where,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { firebaseConfig, PRODUCTS_COLLECTION } from "./firebase-config.js";
+import { imageForType } from "./type-images.js";
 
 (function () {
   "use strict";
@@ -150,8 +151,8 @@ import { firebaseConfig, PRODUCTS_COLLECTION } from "./firebase-config.js";
 
     card.innerHTML = `
       <div class="product-image-wrap">
-        <img src="${product.image || "assets/images/placeholder.svg"}" alt="${escapeHtml(product.name)}"
-             onerror="this.src='assets/images/placeholder.svg'" />
+        <img src="${product.image || imageForType(product.type)}" alt="${escapeHtml(product.name)}"
+             onerror="this.src='${imageForType(product.type)}'" />
         ${outOfStock ? '<span class="badge-oos">غير متوفر حالياً</span>' : ""}
       </div>
       <div class="product-body">
@@ -293,8 +294,8 @@ import { firebaseConfig, PRODUCTS_COLLECTION } from "./firebase-config.js";
       const row = document.createElement("div");
       row.className = "cart-item";
       row.innerHTML = `
-        <img src="${item.image || "assets/images/placeholder.svg"}" alt="${escapeHtml(item.name)}"
-             onerror="this.src='assets/images/placeholder.svg'" />
+        <img src="${item.image || imageForType(item.type)}" alt="${escapeHtml(item.name)}"
+             onerror="this.src='${imageForType(item.type)}'" />
         <div class="cart-item-info">
           <p class="cart-item-name">${escapeHtml(item.name)}</p>
           <p class="cart-item-price">${formatPrice(item.price)} ر.س ×
